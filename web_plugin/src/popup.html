@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Moje Okno Pluginu</title>
+    <style>
+        /* Styl dla przycisku */
+        .button {
+            padding: 10px 20px;
+            background-color: #0078d4;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<button class="button" id="myButton">Kliknij mnie!</button>
+<script>
+    // Obsługa kliknięcia przycisku
+    document.getElementById('myButton').addEventListener('click', function() {
+        // Tutaj możesz dodać kod, który zostanie wykonany po kliknięciu przycisku
+        alert('Witaj! Twój plugin działa!');
+    });
+</script>
+</body>
+</html>
