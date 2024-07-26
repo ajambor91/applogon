@@ -1,4 +1,3 @@
-# route.py
 import re
 
 
@@ -19,6 +18,11 @@ class Route:
 
     def match(self, path):
         return self.pattern.match(path)
-
+    def extract_params(self,path):
+        match = self.match(path)
+        if match:
+            return match.groupdict()
+        else:
+            return {}
     def __repr__(self):
         return f'Route(path={self.path}, method={self.http_method}, controller={self.controller.__name__}, action={self.action})'

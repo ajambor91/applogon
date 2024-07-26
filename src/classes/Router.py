@@ -4,7 +4,7 @@ import json
 import os
 from http.server import BaseHTTPRequestHandler
 from src.classes.Route import Route
-
+from urllib.parse import urlparse, parse_qs
 from glob import glob
 from src.config import ROOT_DIR
 
@@ -59,7 +59,23 @@ class Router(BaseHTTPRequestHandler):
         if route and route.guard is None or route.guard and route.guard.guard('sjdhakujfgejhfg'):
             controller_instance = route.controller(self.server, self.path.split('/'))
             action = getattr(controller_instance, route.action)
-            response = action()
+            path_params = route.extract_params(self.path)
+            query_params = parse_qs(urlparse(self.path).query)
+            query_params = {k: v[0] for k, v in query_params.items()}
+            content_length = int(self.headers.get('Content-Length'),0)
+            post_params = {}
+            if content_length > 0:
+                post_params = self.rfile.read(content_length).decode('utf-8')
+                if self.headers.get('Content-Type') == 'application/json':
+                    try:
+                        post_params = json.loads(post_params)
+                    except json.JSONDecodeError as e:
+                        return
+                else:
+                    post_params = parse_qs(post_params)
+                    post_params = {k: v[0] for k, v in post_params.items()}
+            params = {**path_params, **query_params, **post_params}
+            response = action(**params)
             self.send_response(response.get_response().get('code'))
             headers = response.get_response().get('headers').get_headers().items()
             for header in headers:

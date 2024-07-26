@@ -14,14 +14,20 @@ class PageController:
         self.repo = PageRepo()
 
     @post('/insert')
-    def test(self):
+    def test(self, **kwargs):
         self.repo = PageRepo()
-
-        self.repo.insert_page(Page(link='test', login_field='data', password_field='datd', domain='dsadsd'))
+        print(kwargs.get('xx'))
+        self.repo.insert_page(Page(link='test', login_field='data', password_field='datd', domain='domena'))
         return Response('sadsdLogin', 404)
-    @get('/get', guard=RouteGuard)
+    @get('/get')
     def testX(self):
         self.repo = PageRepo()
-
         records = self.repo.get_pages()[0].decrypted_domain
-        return Response('dddd', 200, body=records)
+        return Response('dddd', 200, body='aaaaa')
+
+    @get('/get/:domain')
+    def testk(self, domain):
+        self.repo = PageRepo()
+        page = Page(domain=domain)
+        record = self.repo.get_page(page)
+        return Response('dddd', 200, body=record.decrypted_password_field)

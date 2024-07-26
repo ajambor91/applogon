@@ -24,7 +24,8 @@ class DataBase(object):
                                login_field TEXT,
                                password_field TEXT,
                                domain TEXT, 
-                               link TEXT
+                               link TEXT,
+                               hashed_domain TEXT
                            )''')
 
     def __create_table_user(self, cursor):

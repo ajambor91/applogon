@@ -1,6 +1,7 @@
 import os.path
 from src.config import HOME_PATH
 from cryptography.fernet import Fernet
+import hashlib
 
 class Crypto:
     def __init__(self):
@@ -16,7 +17,11 @@ class Crypto:
         return f.read()
 
     def encrypt(self, data):
-        return self.fernet.encrypt(data.encode('utf-8'))
+        return self.fernet.encrypt(data.encode('utf-8')).decode('utf-8') if data is not None  else None
 
     def decrypt(self, data):
-        return self.fernet.decrypt(data).decode('utf-8')
+        return self.fernet.decrypt(data).decode('utf-8')  if data is not None  else None
+
+    def hash(self, data):
+        p_bytes = data.encode('utf-8')
+        return hashlib.sha224(p_bytes).hexdigest()
