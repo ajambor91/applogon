@@ -21,10 +21,10 @@ class DataBase(object):
     def __create_table(self, cursor):
         cursor.execute('''CREATE TABLE IF NOT EXISTS pages (
                                id INTEGER PRIMARY KEY,
+                               login_field TEXT,
+                               password_field TEXT,
                                domain TEXT, 
-                               link TEXT,
-                               login TEXT,
-                               password TEXT
+                               link TEXT
                            )''')
 
     def __create_table_user(self, cursor):
@@ -39,3 +39,4 @@ class DataBase(object):
             self.__create_table(cursor)
             self.__create_table_user(cursor)
         except sqlite3.Error as e:
+            print('EXCEPTION',e)

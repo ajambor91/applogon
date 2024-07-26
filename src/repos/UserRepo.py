@@ -8,6 +8,7 @@ class UserRepo:
 
     @entity
     def insert_user(self, user: User):
+
         try:
             cursor = self.conn.db_connect()
             cursor.execute('''INSERT INTO user (login, password)

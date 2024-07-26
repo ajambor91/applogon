@@ -29,7 +29,6 @@ class Router(BaseHTTPRequestHandler):
                 module = importlib.util.module_from_spec(spec)
                 spec.loader.exec_module(module)
                 self.__get_decorators(module)
-            else:
 
     def __get_decorators(self, module):
         for attr_name in dir(module):

@@ -11,7 +11,6 @@ class UserAuthService(object):
         return cls.instance
 
     def login(self, login, password, session_id):
-
         poss_user = User(login, password)
         user = self.__user_repo.get_user(poss_user)
         self.__user_state.current_user = user
