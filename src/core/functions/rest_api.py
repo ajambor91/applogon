@@ -1,10 +1,6 @@
 import functools
-from urllib.parse import urlparse, parse_qs
-from http.server import BaseHTTPRequestHandler
-import json
 import re
-import inspect
-from src.model.Response import Response
+
 def extract_params(input_string):
     pattern = r'(\w+):([^/]+)'
     matches = re.findall(pattern, input_string)

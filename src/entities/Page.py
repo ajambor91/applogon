@@ -1,4 +1,4 @@
-from src.classes.Crypto import Crypto
+from src.core.classes.Crypto import Crypto
 class Page:
     def __init__(self, domain,link = None, login_field = None, password_field = None):
         self.__crypto = Crypto()

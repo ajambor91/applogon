@@ -2,10 +2,9 @@ import os.path
 from http.server import HTTPServer
 from src.db.DataBase import DataBase
 
-from src.src.classes.Crypto import Crypto
-from src.src.classes.Router import Router
+from src.src.core.classes.Crypto import Crypto
+from src.src.core.classes.Router import Router
 from src.config import HOME_PATH
-from src.config import USER_HOME_PATH
 from cryptography.fernet import Fernet
 
 class App:

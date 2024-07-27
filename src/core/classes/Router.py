@@ -3,10 +3,12 @@ import inspect
 import json
 import os
 from http.server import BaseHTTPRequestHandler
-from src.classes.Route import Route
+from src.core.model.Route import Route
 from urllib.parse import urlparse, parse_qs
 from glob import glob
 from src.config import ROOT_DIR
+from src.src.core.model.Response import Response
+
 
 class Router(BaseHTTPRequestHandler):
     def __init__(self, request, client_address, server):
@@ -87,24 +89,31 @@ class Router(BaseHTTPRequestHandler):
 
     def __handle_request(self, method):
         route = self.__route(self.path, method)
-        if route and route.guard is None or route.guard and route.guard.guard('sjdhakujfgejhfg'):
-            self.current_route = route
-            controller_instance = route.controller(self.server, self.path.split('/'))
-            action = getattr(controller_instance, route.action)
-            params = self.__get_params()
-            response = action(**params)
-            self.send_response(response.get_response().get('code'))
-            headers = response.get_response().get('headers').get_headers().items()
-            for header in headers:
-                self.send_header(header[0], header[1])
-            self.end_headers()
-
-            body = {
-                "message": response.get_response().get('body')
-            }
-            body.update({"body": response.get_response().get('message')})
-            self.wfile.write(json.dumps(body).encode('utf-8'))
-        elif route.guard and route.guard.guard('sjdhakujfgejhfg') is not True:
-            self.send_error(403, "Forbidden")
+        if route is not None:
+            is_login = True
+            if route.guard is not None:
+                is_login = route.guard.guard(self)
+            if is_login is True:
+                self.current_route = route
+                controller_instance = route.controller(self.server, self.path.split('/'))
+                action = getattr(controller_instance, route.action)
+                params = self.__get_params()
+                response = action(**params)
+            else:
+                response =  Response(message='Unauthorized', code=403)
         else:
-            self.send_error(404, "Not Found")
+            response =  Response(message='Not found', code=404)
+
+        self.__send_response(response)
+    def __send_response(self, response: Response):
+        self.send_response(response.get_response().get('code'))
+        headers = response.get_response().get('headers').get_headers().items()
+        for header in headers:
+            self.send_header(header[0], header[1])
+        self.end_headers()
+
+        body = {
+            "message": response.get_response().get('body')
+        }
+        body.update({"body": response.get_response().get('message')})
+        self.wfile.write(json.dumps(body).encode('utf-8'))

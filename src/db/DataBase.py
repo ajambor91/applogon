@@ -32,7 +32,8 @@ class DataBase(object):
         cursor.execute('''CREATE TABLE IF NOT EXISTS user (
                                id INTEGER PRIMARY KEY,
                                login TEXT,
-                               password TEXT
+                               password TEXT,
+                               jwt_token TEXT
                            )''')
     def __check_table(self):
         try:

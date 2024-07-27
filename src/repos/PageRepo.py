@@ -1,6 +1,6 @@
 from src.entities.Page import Page
 from src.db.DataBase import DataBase
-from src.functions.db import entity
+from src.core.functions.db import entity
 
 from src.entities.DecryptedPage import DecryptedPage
 
@@ -34,11 +34,13 @@ class PageRepo:
         cursor = self.conn.db_connect()
         cursor.execute('''SELECT login_field, password_field, domain, link FROM pages WHERE hashed_domain = ? ''',(page.hashed_domain,))
         result = cursor.fetchone()
+        data = None
+        if (result is not None):
+            data = DecryptedPage(
+                login_field=result[0],
+                password_field=result[1],
+                domain=result[2],
+                link=result[3]
+            )
 
-        data = DecryptedPage(
-            login_field=result[0],
-            password_field=result[1],
-            domain=result[2],
-            link=result[3]
-        )
         return data
