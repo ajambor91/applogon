@@ -15,6 +15,7 @@ class Router(BaseHTTPRequestHandler):
     def __new__(cls, *args, **kwargs):
         instance = super().__new__(cls)
         instance.routes = []
+        instance.current_route = None
         instance.__controllers_dir = os.path.join(ROOT_DIR, 'controllers')
         instance.__get_controllers()
         return instance
@@ -30,6 +31,36 @@ class Router(BaseHTTPRequestHandler):
                 spec.loader.exec_module(module)
                 self.__get_decorators(module)
 
+    def __get_content_type(self):
+        return self.headers.get('Content-Type')
+    def __get_content_length(self):
+        return int(self.headers.get('Content-Length'),0)
+    def __get_post_params(self):
+        content_length = self.__get_content_length()
+        content_type = self.__get_content_type()
+        post_params = {}
+        if content_length > 0:
+            post_params = self.rfile.read(content_length).decode('utf-8')
+            if content_type == 'application/json':
+                try:
+                    post_params = json.loads(post_params)
+                except json.JSONDecodeError as e:
+                    return
+            else:
+                post_params = parse_qs(post_params)
+                post_params = {k: v[0] for k, v in post_params.items()}
+        return post_params
+    def __get_path_params(self):
+        return self.current_route.extract_params(self.path)
+    def __get_params(self):
+        post_params = self.__get_post_params()
+        query_params = self.__query_params()
+        path_params = self.__get_path_params()
+        return {**path_params, **query_params, **post_params}
+    def __query_params(self):
+        query_params = parse_qs(urlparse(self.path).query)
+        query_params = {k: v[0] for k, v in query_params.items()}
+        return query_params
     def __get_decorators(self, module):
         for attr_name in dir(module):
             attr = getattr(module, attr_name)
@@ -41,7 +72,7 @@ class Router(BaseHTTPRequestHandler):
                             full_path = base_path.rstrip('/') + '/' + getattr(method, '__url__').lstrip('/')
                             self.routes.append(Route(path=full_path, http_method=getattr(method, '__http_method__'), controller=attr,action= method_name, guard=getattr(method,'__guard__')))
 
-    def route(self, path, method):
+    def __route(self, path, method):
 
         for route in self.routes:
             if route.match(path) and route.http_method == method:
@@ -55,26 +86,12 @@ class Router(BaseHTTPRequestHandler):
         self.__handle_request('GET')
 
     def __handle_request(self, method):
-        route = self.route(self.path, method)
+        route = self.__route(self.path, method)
         if route and route.guard is None or route.guard and route.guard.guard('sjdhakujfgejhfg'):
+            self.current_route = route
             controller_instance = route.controller(self.server, self.path.split('/'))
             action = getattr(controller_instance, route.action)
-            path_params = route.extract_params(self.path)
-            query_params = parse_qs(urlparse(self.path).query)
-            query_params = {k: v[0] for k, v in query_params.items()}
-            content_length = int(self.headers.get('Content-Length'),0)
-            post_params = {}
-            if content_length > 0:
-                post_params = self.rfile.read(content_length).decode('utf-8')
-                if self.headers.get('Content-Type') == 'application/json':
-                    try:
-                        post_params = json.loads(post_params)
-                    except json.JSONDecodeError as e:
-                        return
-                else:
-                    post_params = parse_qs(post_params)
-                    post_params = {k: v[0] for k, v in post_params.items()}
-            params = {**path_params, **query_params, **post_params}
+            params = self.__get_params()
             response = action(**params)
             self.send_response(response.get_response().get('code'))
             headers = response.get_response().get('headers').get_headers().items()

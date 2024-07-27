@@ -1,6 +1,7 @@
 from src.repos.UserRepo import UserRepo
 from src.entities.User import User
 from src.guard.UserStateManager import UserStateManager
+import jwt
 class UserAuthService(object):
     def __init__(self):
         self.__user_state = UserStateManager()
